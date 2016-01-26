@@ -1,16 +1,16 @@
 #ifndef UART_multiData_H
 #define UART_multiData_H
-
-#include "mbed.h"
+#define HEADER 255
+include "mbed.h"
 
 
 class UART_multiData {
 
 public:
   UART_multiData(PinName rx,PinName tx,uint c_Num,uint f_Num);
-  void SetCaddr(char *cdata);
+  void SetCaddr(char cdata[]);
 
-  void SetFaddr(float *fdata);
+  void SetFaddr(float fdata[]);
 
   void PutData();
 
@@ -19,6 +19,7 @@ protected:
   Serial _serial;
   uint _cNum;
   uint _fNum;
-  char *_cdata;
-  float *_fdata;
+  char *_cdata = NULL;
+  float *_fdata = NULL;
 }
+#endif
