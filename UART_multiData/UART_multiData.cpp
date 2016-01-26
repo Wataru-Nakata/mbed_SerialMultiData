@@ -7,62 +7,64 @@ union float2bytes
   char b[sizeof(float)];
 };
 
-UART_multiData::UART_multiData(PinName rx,PinName tx,uint c_Num,uint f_Num): _serial(rx,tx)
+UART_multiData::UART_multiData(PinName rx,PinName tx,unsigned int c_Num,unsigned int f_Num): _serial_(rx,tx)
 {
   _cNum = c_Num;
   _fNum = f_Num;
+  _cdata = NULL;
+  _fdata = NULL;
+  HEADER = 255;
 }
-
-UART_multiData::SetCaddr(char cdata[])
+void UART_multiData::SetCaddr(char cdata[])
 {
   _cdata =cdata;
 }
 
-UART_multiData::SetFaddr(float fdata[])
+void UART_multiData::SetFaddr(float fdata[])
 {
   _fdata = fdata;
 }
 
-UART_multiData::PutData()
+int UART_multiData::PutData()
 {
   if ((_cdata == NULL) || (_fdata == NULL)) {
     return 1;
   }
   float2bytes putf[_fNum];
-  for (int i = 0; i < f_Num; i++) {
-    putf[i].f = _fdata[i]
+  for (int i = 0; i < _fNum; i++) {
+    putf[i].f = _fdata[i];
   }
-  _serial.write(HEADER);
+  _serial_.putc(HEADER);
   for (int i = 0; i < _cNum; i++) {
-    _serial.write(_cdata[i])
+    _serial_.putc(_cdata[i]);
   }
-  for (int i = 0; i < f_Num; i++) {
+  for (int i = 0; i < _fNum; i++) {
     for (int j= 0; j < sizeof(float); j++) {
-      _serial.write(putf[i].b[j])
+      _serial_.putc(putf[i].b[j]);
     }
   }
   return 0;
 }
 
-UART_multiData::GetData()
+int UART_multiData::GetData()
 {
   if ((_cdata == NULL) || (_fdata == NULL)) {
     return 1;
   }
   float2bytes getf[_fNum];
-  for (int i = 0; i < f_Num; i++) {
-    getf[i].f = *_fdata[i]
+  for (int i = 0; i < _fNum; i++) {
+    getf[i].f = _fdata[i];
   }
-  if ((_serial.getc() == HEADER) && _serial.readable()) {
+  if ((_serial_.getc() == HEADER) && _serial_.readable()) {
     for (int i = 0; i < _cNum; i++) {
-      _cdata[i] = _serial.getc()
+      _cdata[i] = _serial_.getc();
     }
     for (int i = 0; i < _fNum; i++) {
       for (int j = 0; j < sizeof(float); j++) {
-        getf[i].b[j] = _serial.getc()
+        getf[i].b[j] = _serial_.getc();
       }
     }
-    for (int i = 0; i < f_Num; i++) {
+    for (int i = 0; i < _fNum; i++) {
       _fdata[i] = getf[i].f;
     }
     return 0;
