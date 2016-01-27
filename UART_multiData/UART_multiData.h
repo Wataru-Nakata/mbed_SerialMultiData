@@ -14,12 +14,16 @@ public:
   int PutData();
 
   int GetData();
+
+  void SetHeader(unsigned char header);
+
+  void SetBaudrate(unsigned int baud);
 private:
   Serial _serial_;
   unsigned int _cNum;
   unsigned int _fNum;
   char *_cdata;
   float *_fdata;
-  char HEADER;
+  unsigned char HEADER;
 };
 #endif

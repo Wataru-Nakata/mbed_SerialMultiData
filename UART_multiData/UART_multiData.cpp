@@ -27,19 +27,19 @@ void UART_multiData::SetFaddr(float fdata[])
 
 int UART_multiData::PutData()
 {
-  if ((_cdata == NULL) || (_fdata == NULL)) {
+  if ((_cdata == NULL) || (_fdata == NULL) ||(_serial_.writeable())) {
     return 1;
   }
   float2bytes putf[_fNum];
-  for (int i = 0; i < _fNum; i++) {
+  for (unsigned int i = 0; i < _fNum; i++) {
     putf[i].f = _fdata[i];
   }
   _serial_.putc(HEADER);
-  for (int i = 0; i < _cNum; i++) {
+  for (unsigned int i = 0; i < _cNum; i++) {
     _serial_.putc(_cdata[i]);
   }
-  for (int i = 0; i < _fNum; i++) {
-    for (int j= 0; j < sizeof(float); j++) {
+  for (unsigned int i = 0; i < _fNum; i++) {
+    for (unsigned int j= 0; j < sizeof(float); j++) {
       _serial_.putc(putf[i].b[j]);
     }
   }
@@ -52,23 +52,33 @@ int UART_multiData::GetData()
     return 1;
   }
   float2bytes getf[_fNum];
-  for (int i = 0; i < _fNum; i++) {
+  for (unsigned int i = 0; i < _fNum; i++) {
     getf[i].f = _fdata[i];
   }
   if ((_serial_.getc() == HEADER) && _serial_.readable()) {
-    for (int i = 0; i < _cNum; i++) {
+    for (unsigned int i = 0; i < _cNum; i++) {
       _cdata[i] = _serial_.getc();
     }
-    for (int i = 0; i < _fNum; i++) {
-      for (int j = 0; j < sizeof(float); j++) {
+    for (unsigned int i = 0; i < _fNum; i++) {
+      for (unsigned int j = 0; j < sizeof(float); j++) {
         getf[i].b[j] = _serial_.getc();
       }
     }
-    for (int i = 0; i < _fNum; i++) {
+    for (unsigned int i = 0; i < _fNum; i++) {
       _fdata[i] = getf[i].f;
     }
     return 0;
   }else{
     return 1;
   }
+}
+
+void UART_multiData::SetHeader(unsigned char header)
+{
+  HEADER = header;
+}
+
+void UART_multiData::SetBaudrate(unsigned int baud)
+{
+  _serial_.baud(baud);
 }
